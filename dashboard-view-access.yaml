@@ -1,12 +1,13 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+apiVersion: v1
+kind: Service
 metadata:
-  name: view-all
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin   # Otorga visibilidad completa, asegúrate de que sea seguro
-subjects:
-- kind: ServiceAccount
-  name: isadmin         # Reemplaza con el nombre correcto si es diferente
+  name: kubernetes-dashboard
   namespace: kubernetes-dashboard
+spec:
+  type: NodePort
+  selector:
+    k8s-app: kubernetes-dashboard  # Asegúrate de que coincide
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30000  # Asegúrate de que este puerto esté disponible
