@@ -37,10 +37,11 @@ kind: Ingress
 metadata:
   name: grafana-ingress
   namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
 spec:
-  ingressClassName: nginx
   rules:
-  - host: innovation.grafana.com  # Cambia al dominio que quieras usar
+  - host: innovation.grafana.com
     http:
       paths:
       - path: /
