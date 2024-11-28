@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ansible-deployment
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ansible
+  template:
+    metadata:
+      labels:
+        app: ansible
+    spec:
+      containers:
+      - name: ansible
+        image: cytopia/ansible:latest # Imagen pública de Ansible
+        command: ["sleep", "infinity"] # Mantener el contenedor en ejecución
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ansible-service
+  namespace: argocd
+spec:
+  type: NodePort
+  selector:
+    app: ansible
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30002
