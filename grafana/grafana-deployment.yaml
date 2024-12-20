@@ -17,6 +17,20 @@ spec:
         image: grafana/grafana:latest
         ports:
         - containerPort: 3000
+        volumeMounts:
+          - name: grafana-plugins
+            mountPath: /var/lib/grafana/plugins
+          - name: grafana-storage
+            mountPath: /var/lib/grafana
+        args:
+          - "--plugin"
+          - "install alexanderzobnin-zabbix-app"
+      volumes:
+      - name: grafana-plugins
+        emptyDir: {}
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -30,4 +44,3 @@ spec:
   - port: 3000
     targetPort: 3000
     nodePort: 30001
-
