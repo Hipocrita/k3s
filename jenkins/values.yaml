@@ -1,0 +1,7 @@
+controller:
+  serviceType: NodePort
+  service:
+    nodePort: 30200
+  admin:
+    username: admin
+    createSecret: false
