@@ -1,7 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: grafana-nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-websockets: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - rcg.grafana.es
+    secretName: grafana-tls
+  rules:
+  - host: rcg.grafana.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
+  namespace: grafana-nginx
 spec:
   replicas: 1
   selector:
@@ -29,6 +61,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana
+  namespace: grafana-nginx
 spec:
   type: ClusterIP
   selector:
@@ -37,3 +70,4 @@ spec:
   - port: 3000
     targetPort: 3000
  #   nodePort: 30001
+ #   .
