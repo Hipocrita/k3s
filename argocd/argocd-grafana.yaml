@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://gitlab.com/robertocg/grafana.git
+    repoURL: https://github.com/Hipocrita/k3s.git
     targetRevision: main
     path: grafana
   destination:
