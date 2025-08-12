@@ -8,11 +8,8 @@ spec:
   source:
     repoURL: https://github.com/Hipocrita/k3s.git
     targetRevision: main
-<<<<<<< HEAD
     path: k3s/ELK
-=======
     path: ELK
->>>>>>> b723aa3abba09417118a3d844b27cbbf676b9207
   destination:
     server: https://kubernetes.default.svc
     namespace: default
