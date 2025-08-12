@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Hipocrita/k3s.git
-    targetRevision: main
+    targetRevision: HEAD
     path: git/k3s/ELK
   destination:
     server: https://kubernetes.default.svc
