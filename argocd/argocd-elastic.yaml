@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/Hipocrita/k3s.git
     targetRevision: main
-    path: applications/elasticsearch
+    path: git/k3s/ELK
   destination:
     server: https://kubernetes.default.svc
     namespace: default
