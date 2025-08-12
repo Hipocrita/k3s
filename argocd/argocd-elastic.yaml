@@ -9,7 +9,6 @@ spec:
     repoURL: https://github.com/Hipocrita/k3s.git
     targetRevision: main
     path: k3s/ELK
-    path: ELK
   destination:
     server: https://kubernetes.default.svc
     namespace: default
