@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-next-wireguard-peer
+  namespace: wireguard
+spec:
+  template:
+    spec:
+      serviceAccountName: argocd-server
+      containers:
+      - name: peer-creator
+        image: bitnami/kubectl:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Reiniciando el Deployment de WireGuard para generar el proximo peer..."
+            # Escala a 0 para detener el pod
+            kubectl -n wireguard scale deployment wireguard-server --replicas=0
+            # Espera a que el pod desaparezca
+            sleep 10
+            # Escala a 1 para forzar la recreacion y la generacion del peer4.conf
+            kubectl -n wireguard scale deployment wireguard-server --replicas=1
+            echo "El nuevo archivo peer4.conf ya ha sido generado dentro del pod."
+        # No reiniciar si falla
+      restartPolicy: OnFailure
