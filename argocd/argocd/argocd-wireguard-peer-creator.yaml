@@ -1,0 +1,20 @@
+# argocd/argocd-wireguard-peer-creator.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wireguard-peer-creator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Hipocrita/k3s.git
+    targetRevision: main
+    path: wireguard-generator # <--- Carpeta que contiene el Job
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wireguard
+  # Prune para que Argo CD borré el job cuando esté completado
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
