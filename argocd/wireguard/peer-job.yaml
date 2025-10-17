@@ -16,7 +16,7 @@ spec:
       - name: peer-updater
         image: bitnami/kubectl:latest
         command: ["/bin/bash", "-c"]
-        args:
+          args:
           - |
             # 1. Definir la nueva cantidad de peers deseada (¡EDITAR ESTE VALOR EN GIT!)
             NEW_PEER_COUNT="6"
@@ -25,11 +25,9 @@ spec:
             
             echo "Parcheando Deployment $DEPLOYMENT_NAME con PEERS=$NEW_PEER_COUNT..."
             
-            # 2. Parche JSON para reemplazar el valor de la variable PEERS (índice 5)
-            # CORRECCIÓN 2: Índice cambiado a 5 para apuntar a PEERS.
-            kubectl patch deployment $DEPLOYMENT_NAME \
-              --namespace $NAMESPACE \
-              --type='json' \
-              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/5", "value": {"name": "PEERS", "value": "'$NEW_PEER_COUNT'"}}]'
+            # 2. Usar 'Strategic Merge Patch' para reemplazar la variable de entorno PEERS. 
+            #    Este método encuentra la ENV por nombre, no por índice de array.
+            kubectl patch deployment $DEPLOYMENT_NAME -n $NAMESPACE \
+              --patch '{"spec":{"template":{"spec":{"containers":[{"name":"wireguard", "env":[{"name":"PEERS", "value": "'$NEW_PEER_COUNT'"}]}]}}}}'
               
             echo "Parche aplicado. El Deployment se reiniciará."
