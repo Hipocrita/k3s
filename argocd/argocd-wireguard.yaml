@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wireguard-server
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io # Para asegurar la limpieza al borrar la app
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Hipocrita/k3s.git
+    targetRevision: main
+    path: wireguard-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wireguard
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true #  crea el namespace si no existe
