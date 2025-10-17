@@ -1,27 +1,35 @@
-# argocd/wireguard-generator/peer-creator-job.yaml
+# argocd/wireguard/peer-job.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: wireguard-peer-updater
+  # CORRECCIÓN 1: generateName debe terminar con un guion (-)
+  generateName: wireguard-peer-updater-
   namespace: wireguard
 spec:
+  # CORRECCIÓN ADICIONAL: backoffLimit para manejar fallos
+  backoffLimit: 4
   template:
     spec:
-      serviceAccountName: peer-scaler-sa # Usa el Service Account con permisos
-      restartPolicy: Never
+      serviceAccountName: peer-scaler-sa
+      restartPolicy: OnFailure
       containers:
       - name: peer-updater
-        image: bitnami/kubectl:latest # Un contenedor con kubectl para interactuar con K8s
-        # Este comando es el corazón de la lógica:
+        image: bitnami/kubectl:latest
         command: ["/bin/bash", "-c"]
         args:
           - |
-            # 1. Generar claves y archivos de configuración para el nuevo peer (lógica compleja)
-            # 2. Leer/Modificar el ConfigMap o el PVC del servidor WireGuard (más complejo)
-            # --- O la forma más sencilla, si usas la imagen linuxserver/wireguard ---
-            # 3. Cambiar el número de PEERS en el Deployment, forzando un reinicio/reconfiguración
-            kubectl patch deployment wireguard-server \
-              --namespace wireguard \
+            # 1. Definir la nueva cantidad de peers deseada (¡EDITAR ESTE VALOR EN GIT!)
+            NEW_PEER_COUNT="6"
+            DEPLOYMENT_NAME="wireguard-server"
+            NAMESPACE="wireguard"
+            
+            echo "Parcheando Deployment $DEPLOYMENT_NAME con PEERS=$NEW_PEER_COUNT..."
+            
+            # 2. Parche JSON para reemplazar el valor de la variable PEERS (índice 5)
+            # CORRECCIÓN 2: Índice cambiado a 5 para apuntar a PEERS.
+            kubectl patch deployment $DEPLOYMENT_NAME \
+              --namespace $NAMESPACE \
               --type='json' \
-              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value": {"name": "PEERS", "value": "5"}}]'
-            # (El índice de la variable PEERS en tu Deployment original es solo un ejemplo)
+              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/5", "value": {"name": "PEERS", "value": "'$NEW_PEER_COUNT'"}}]'
+              
+            echo "Parche aplicado. El Deployment se reiniciará."
