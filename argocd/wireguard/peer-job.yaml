@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: wireguard-peer-updater-{{ .Values.peerName }} # Usar Helm/Kustomize para generar un nombre único
+  generateName: wireguard-peer-updater
   namespace: wireguard
 spec:
   template:
