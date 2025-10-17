@@ -4,13 +4,23 @@ metadata:
   name: grafana-ingress
   namespace: grafana-nginx
   annotations:
-    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    # --- ANOTACIONES CRÍTICAS DE REDIRECCIÓN Y PROXY ---
+    cert-manager.io/cluster-issuer: "selfsigned-issuer" 
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # 💥 CRÍTICO: Asegura que NGINX use HTTP al hablar con Grafana
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    
+    # 💥 CRÍTICO: Asegura que la ruta '/' se reescriba a '/' para el backend
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    
+    # Ajustes de proxy que ya tenías
     nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-websockets: "true"
+    
 spec:
   ingressClassName: nginx
   tls:
@@ -28,6 +38,7 @@ spec:
             name: grafana
             port:
               number: 3000
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -49,6 +60,14 @@ spec:
         image: grafana/grafana:latest
         ports:
         - containerPort: 3000
+        # 💥 CRÍTICO: AÑADIDO - Variables de Entorno para el proxy de Grafana
+        env:
+        - name: GF_SERVER_ROOT_URL
+          value: https://rcg.grafana.es/ 
+        - name: GF_SERVER_PROTOCOL
+          value: http 
+        - name: GF_SERVER_DOMAIN
+          value: rcg.grafana.es
         volumeMounts:
         - name: grafana-storage
           mountPath: /var/lib/grafana
@@ -56,6 +75,7 @@ spec:
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: grafana-pvc
+
 ---
 apiVersion: v1
 kind: Service
@@ -69,5 +89,17 @@ spec:
   ports:
   - port: 3000
     targetPort: 3000
- #   nodePort: 30001
- #   .
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: grafana-nginx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: local-path
