@@ -23,5 +23,5 @@ spec:
             kubectl patch deployment wireguard-server \
               --namespace wireguard \
               --type='json' \
-              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value": {"name": "PEERS", "value": "6"}}]'
+              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value": {"name": "PEERS", "value": "5"}}]'
             # (El índice de la variable PEERS en tu Deployment original es solo un ejemplo)
