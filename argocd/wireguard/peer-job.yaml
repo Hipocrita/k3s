@@ -1,0 +1,27 @@
+# argocd/wireguard-generator/peer-creator-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wireguard-peer-updater-{{ .Values.peerName }} # Usar Helm/Kustomize para generar un nombre único
+  namespace: wireguard
+spec:
+  template:
+    spec:
+      serviceAccountName: peer-scaler-sa # Usa el Service Account con permisos
+      restartPolicy: Never
+      containers:
+      - name: peer-updater
+        image: bitnami/kubectl:latest # Un contenedor con kubectl para interactuar con K8s
+        # Este comando es el corazón de la lógica:
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            # 1. Generar claves y archivos de configuración para el nuevo peer (lógica compleja)
+            # 2. Leer/Modificar el ConfigMap o el PVC del servidor WireGuard (más complejo)
+            # --- O la forma más sencilla, si usas la imagen linuxserver/wireguard ---
+            # 3. Cambiar el número de PEERS en el Deployment, forzando un reinicio/reconfiguración
+            kubectl patch deployment wireguard-server \
+              --namespace wireguard \
+              --type='json' \
+              -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/1", "value": {"name": "PEERS", "value": "6"}}]'
+            # (El índice de la variable PEERS en tu Deployment original es solo un ejemplo)
